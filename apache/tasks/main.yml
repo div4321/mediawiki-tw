@@ -1,0 +1,13 @@
+---
+# tasks file for apache
+- 
+  name: Install apache
+  yum:
+    name: httpd
+    state: latest
+- 
+  name: start apache
+  systemd:
+    enabled: yes
+    name: httpd
+    state: started

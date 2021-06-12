@@ -1,0 +1,52 @@
+---
+# tasks file for mediawiki
+- 
+  name: Install wget and tar
+  yum:
+    name:
+      - wget
+      - tar
+    state: latest
+- 
+  name: Install EPEL & Remi's repo
+  dnf:
+    disable_gpg_check: true
+    name: 
+      - 'https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm'
+      - 'https://rpms.remirepo.net/enterprise/remi-release-8.rpm'
+    state: present
+-
+  shell: "dnf module install -y php:remi-8.0"
+-
+  name: Install php
+  dnf:
+    name:
+      - php-mysqlnd
+      - php-intl
+    state: present
+-
+  name: Restart apache
+  systemd:
+    name: httpd
+    state: restarted
+- 
+ name: Download and Unarchive MediaWiki
+ unarchive: 
+   src: "https://releases.wikimedia.org/mediawiki/1.36/mediawiki-1.36.0.tar.gz"
+   dest: /tmp/
+   remote_src: yes
+- 
+  name: Copy to html directory
+  copy:
+    src: '/tmp/mediawiki-1.36.0/'
+    dest: /var/www/html/
+    remote_src: yes
+- 
+  name: set SELinux
+  shell: 'setsebool -P httpd_can_network_connect 1'
+
+- 
+  name: display site link
+  debug:
+    msg: http://{{ ansible_host }}
+    

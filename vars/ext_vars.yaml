@@ -1,0 +1,5 @@
+---
+region: ap-south-1
+vpc_id:  #provide the VPC ID
+zone: ap-south-1a
+...

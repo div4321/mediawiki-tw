@@ -1,0 +1,104 @@
+---
+-
+  name: Play to Deploy MySQL DB For MediaWiki Project
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  become: no
+  
+  vars_files:
+   - /home/ansible/aws/ec2/thoughtworks/aws_cred.yml
+   - /home/ansible/aws/ec2/thoughtworks/vars/ext_vars.yaml
+
+  vars_prompt:
+      - name: password
+        prompt: "Provide the 'admin' password for RDS DB value: "
+        private: yes
+
+  tasks:
+    - 
+      name: Create MySQL RDS Database
+      community.aws.rds:
+        aws_access_key: "{{ accesskey }}"
+        aws_secret_key: "{{ secretkey }}"
+        backup_retention: 0
+        command: create
+        db_engine: MySQL
+        db_name: 'ansible_mediawiki_mysql_db'
+        engine_version: 8.0.20
+        instance_name: 'ansible-mediawiki-mysql'
+        instance_type: db.t2.micro
+        multi_zone: no
+        username: admin
+        password: "{{ password }}"
+        port: 3306
+        publicly_accessible: no
+        region: "{{ region }}"
+        vpc_security_groups: sg-0860218c9cb99cd1b
+        size: 10
+        subnet: default-{{ vpc_id }}
+        zone: "{{ zone }}"
+        wait: yes
+        tags:
+          Name: 'Ansible_MediaWiki_MySQL'
+      register: rds
+    -
+      name: Display RDS EndPoint
+      debug:
+        msg: "The new db endpoint is {{ rds.instance.endpoint }}"
+    -
+      name: Display DB Name
+      debug:
+        msg: "The new DB Name is {{ rds.instance.db_name }}"
+
+-
+  name: Play To Launch EC2
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  become: no
+
+  vars_files:
+    - /home/ansible/aws/ec2/thoughtworks/aws_cred.yml
+    - /home/ansible/aws/ec2/thoughtworks/vars/ext_vars.yaml
+
+  tasks:
+    -
+      name: Launch EC2 Instance
+      amazon.aws.ec2:
+        aws_access_key: "{{ accesskey }}"
+        aws_secret_key: "{{ secretkey }}"
+        key_name: "vivaan-mum-kp"
+        image: "ami-06a0b4e3b7eb7a300"
+        region: "{{ region }}"
+        group: "vivaan-external"
+        instance_type: "t2.micro"
+        wait: yes
+        instance_tags:
+          Name: Ansible_MediaWiki
+        exact_count: 1
+        count_tag:
+          Name: Ansible_MediaWiki
+        vpc_subnet_id: subnet-03a91f856888b0308
+        assign_public_ip: yes
+      register: ec2_web
+    - 
+      name: Wait for SSH to come up
+      delegate_to: "{{ item.public_dns_name }}"
+      wait_for_connection:
+        delay: 80
+        timeout: 120
+      loop: "{{ ec2_web.instances }}"
+    - 
+      name: refresh inventory
+      meta: refresh_inventory
+
+- 
+  hosts: tag_Name_Ansible_MediaWiki
+  remote_user: ec2-user
+  become: yes
+  gather_facts: false
+  
+  roles:
+    - { role: mediawiki }
+...
