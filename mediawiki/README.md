@@ -6,7 +6,7 @@ A role to install MediaWiki
 Requirements
 ------------
 
-An EC2 instance with Apache and PHP running.
+An EC2 instance with Apache running.
 
 Dependencies
 ------------
