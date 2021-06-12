@@ -1,6 +1,6 @@
 # MEDIAWIKI AUTODEPLOYEMENT USING ANSIBLE
 
-Execution of the playbook **'mediawiki-ans.yaml'** will launch a MediaWiki Frontend in an AWS EC2 RHEL8 instance and a backend MySQL RDS Instance.  
+Execution of the playbook **'tw_mediawiki.yaml'** will launch a MediaWiki Frontend in an AWS EC2 RHEL8 instance and a backend MySQL RDS Instance.  
 
 I have used predefined Security Group in my AWS VPC where EC2 is publicly accessible over port 80 in a public subnet and RDS instance is launched in private subnet which is only accessible from EC2 security group. 
 
