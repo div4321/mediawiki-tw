@@ -15,7 +15,7 @@ Below are a few important consideration in order to use the code successfully
 1. AWS Access and Secret Keys are stored in an ansible-vault protected file.
 2. Dynamic Inventory file "ec2.ini" is saved in /etc/ansible/ and this file also has the AWS Access & Secret Keys defined in it.
 3. Below requirements are needed on the host that executes this playbook module 
-    a. boto
-    b. boto3
-    c. botocore
-    d. python >= 2.6
+    1. boto
+    2. boto3
+    3. botocore
+    4. python >= 2.6
