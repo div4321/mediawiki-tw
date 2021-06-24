@@ -1,0 +1,33 @@
+---
+AWSTemplateFormatVersion: 2010-09-09
+Description: EC2 Security Group To Allow RDS DB Access
+Parameters:
+  ApplicationName:
+    Description: The application name
+    Type: String
+  VPCId:
+    Description: VPC to create the security group into
+    Type: AWS::EC2::VPC::Id
+  VPCBlock:
+    Type: String
+    Default: 10.150.0.0/24
+    Description: VPC CIDR Range
+  
+Resources:
+  RDSSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: !Sub RDS Security group for ${ApplicationName}
+      SecurityGroupIngress:
+        - CidrIp: !Ref VPCBlock
+          FromPort: 3306
+          ToPort: 3306
+          IpProtocol: tcp
+          Description: Internal Access
+      VpcId: !Ref VPCId
+
+Outputs:
+  RDSGroupId:
+    Value: !Ref RDSSecurityGroup
+    Description: Id for the RDS Security Group
+...

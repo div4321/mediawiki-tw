@@ -1,0 +1,29 @@
+---
+AWSTemplateFormatVersion: 2010-09-09
+Description: EC2 Security Group To Allow SSH
+Parameters:
+  ApplicationName:
+    Description: The application name
+    Type: String
+  VPCId:
+    Description: VPC to create the security group into
+    Type: AWS::EC2::VPC::Id
+  
+Resources:
+  SSHSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: !Sub Security group for ${ApplicationName}
+      SecurityGroupIngress:
+        - CidrIp: "0.0.0.0/0"
+          FromPort: 22
+          ToPort: 22
+          IpProtocol: tcp
+          Description: Pubic SSH
+      VpcId: !Ref VPCId
+
+Outputs:
+  SSHGroupId:
+    Value: !Ref SSHSecurityGroup
+    Description: Id for the SSH Security Group
+...

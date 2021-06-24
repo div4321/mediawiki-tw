@@ -1,0 +1,97 @@
+---
+AWSTemplateFormatVersion: 2010-09-09
+Description: Create RDS MYSQL Instance
+
+Parameters:
+  ApplicationName:
+    Description: The application name
+    Type: String
+  DBSubnet1:
+    Description: The DB Subnet group
+    Type: AWS::EC2::Subnet::Id
+  DBSubnet2:
+    Description: The DB Subnet group
+    Type: AWS::EC2::Subnet::Id
+  VPCSG:
+    Description: Select VPC SecurityGroup
+    Type: AWS::EC2::SecurityGroup::Id
+  AZName:
+    Description: The AZ
+    Type: AWS::EC2::AvailabilityZone::Name
+  DBInstanceName:
+    Description: The RDS instace name
+    Type: String
+    MinLength: '1'
+    MaxLength: '48'
+    AllowedPattern: '[a-z-]*'
+    ConstraintDescription: must begin with a letter and contain only alphabets characters or special character(-). 
+  DBName:
+    Description: The database name
+    Type: String
+    MinLength: '1'
+    MaxLength: '24'
+    AllowedPattern: '[a-zA-Z][a-zA-Z0-9]*'
+    ConstraintDescription: must begin with a letter and contain only alphanumeric characters.
+  DBUser:
+    Description: The database admin account username
+    Type: String
+    MinLength: '1'
+    MaxLength: '16'
+    AllowedPattern: '[a-zA-Z][a-zA-Z0-9]*'
+    ConstraintDescription: must begin with a letter and contain only alphanumeric characters.
+  DBPassword:
+    NoEcho: 'true'
+    Description: The database admin account password
+    Type: String
+    MinLength: '8'
+    MaxLength: '41'
+    AllowedPattern: '[a-zA-Z0-9]*'
+    ConstraintDescription: must contain only alphanumeric characters.
+
+
+Resources:
+  MyDBSubnetGroup:
+    Type: AWS::RDS::DBSubnetGroup
+    Properties:
+      DBSubnetGroupName: db subnet group
+      DBSubnetGroupDescription: !Sub RDS Security group for ${ApplicationName}
+      SubnetIds:
+        - !Ref DBSubnet1
+        - !Ref DBSubnet2
+
+
+  MyDB:
+    Type: AWS::RDS::DBInstance
+    DependsOn: MyDBSubnetGroup
+    Properties:
+      AvailabilityZone: !Ref AZName
+      DBInstanceIdentifier: !Ref DBInstanceName
+      MultiAZ: False
+      PubliclyAccessible: no
+      BackupRetentionPeriod: 0
+      VPCSecurityGroups: 
+        - !Ref VPCSG
+      DBName: !Ref 'DBName'
+      AllocatedStorage: '5'
+      DBInstanceClass: db.t2.micro
+      Engine: MySQL
+      EngineVersion: 8.0.20
+      Port: 3306
+      MasterUsername: !Ref 'DBUser'
+      MasterUserPassword: !Ref 'DBPassword'
+      DBSubnetGroupName: !Ref MyDBSubnetGroup
+      DBSecurityGroups: !Ref 'AWS::NoValue'
+
+Outputs:
+  NameOfDB:
+    Description: Name of DB
+    Value: !Ref 'DBName'
+  DBUserName:
+   Description: DB user name
+   Value: !Ref 'DBUser'
+  DBPort:
+    Description: DB port number
+    Value: !GetAtt [MyDB, Endpoint.Port]
+  EndPoint:
+    Value: !GetAtt [MyDB, Endpoint.Address]
+...

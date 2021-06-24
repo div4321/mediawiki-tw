@@ -1,0 +1,29 @@
+---
+AWSTemplateFormatVersion: 2010-09-09
+Description: EC2 Security Group To Allow HTTP
+Parameters:
+  ApplicationName:
+    Description: The application name
+    Type: String
+  VPCId:
+    Description: VPC to create the security group into
+    Type: AWS::EC2::VPC::Id
+  
+Resources:
+  HTTPSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: !Sub HTTP Security group for ${ApplicationName}
+      SecurityGroupIngress:
+        - CidrIp: "0.0.0.0/0"
+          FromPort: 80
+          ToPort: 80
+          IpProtocol: tcp
+          Description: Pubic HTTP
+      VpcId: !Ref VPCId
+
+Outputs:
+  HTTPGroupId:
+    Value: !Ref HTTPSecurityGroup
+    Description: Id for the HTTP Security Group
+...
